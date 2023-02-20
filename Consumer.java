@@ -1,7 +1,8 @@
-class Consumer extends Thread
+package COP4610;
+
+public class Consumer extends Thread
 {
 	int buffer[];
-	boolean consumable = false;
 
 	Consumer(int buffer[])
 	{
@@ -11,31 +12,45 @@ class Consumer extends Thread
 	@Override
 	public void run()
 	{
-		if (consumable)
+		if (isBufferEmpty())
 		{
 			//buffer is empty, need to wait
 			System.out.println("Buffer is empty, consumer is waiting.");
-			wait();
+			try
+			{
+				wait();
+			}
+			catch(InterruptedException e)
+			{
+				System.out.println("Error - Interrupted Exception.");
+				e.printStackTrace();
+			}
 		}
 		else
 		{
 			//buffer isn't empty, consume.
-			System.out.println("Buffer full
+			System.out.println("Buffer isn't empty, consumer is consuming");
 			consume(buffer);
 			notifyAll();
 		}
 	}
 
-	synchronized public void consume(int buffer[])
+	public boolean isBufferEmpty()
+	{
+		for(int x = 0; x < buffer.length; x++)
+		{
+			if (buffer[x] == 1)
+				return false;
+		}
+		//no 1's found, buffer is empty.
+		return true;
+	}
+	//commented out the "synchronized" keyword in the consume method
+	public void consume(int buffer[])
 	{
 		for (int x = 0; x < buffer.length; x++)
 		{
-			if (buffer[x] != 0)
-				this.consumable = true;
-			else
-				this.consumable = false;
-
-			if (this.consumable)
+			if (buffer[x] == 1)
 				buffer[x] = 0;
 		}
 	}
