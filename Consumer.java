@@ -1,4 +1,3 @@
-package COP4610;
 
 public class Consumer extends Thread
 {
@@ -12,34 +11,48 @@ public class Consumer extends Thread
 	@Override
 	public void run()
 	{
-		if (isBufferEmpty())
+		synchronized (this)
 		{
-			//buffer is empty, need to wait
-			System.out.println("Buffer is empty, consumer is waiting.");
-			try
+			if (isBufferEmpty())
 			{
-				wait();
+				//buffer is empty, need to wait
+				printBuffer();
+				System.out.println("Buffer is empty, consumer is waiting.");
+				try
+				{
+					wait();
+				}
+				catch(InterruptedException e)
+				{
+					System.out.println("Error - Interrupted Exception.");
+					e.printStackTrace();
+				}
 			}
-			catch(InterruptedException e)
+			else
 			{
-				System.out.println("Error - Interrupted Exception.");
-				e.printStackTrace();
+				//buffer isn't empty, consume.
+				printBuffer();
+				System.out.println("Buffer isn't empty, consumer is consuming");
+				consume(this.buffer);
+				notifyAll();
 			}
 		}
-		else
+	}
+
+	synchronized public void printBuffer()
+	{
+		System.out.println("Buffer: ");
+		for (int x = 0; x < this.buffer.length; x++)
 		{
-			//buffer isn't empty, consume.
-			System.out.println("Buffer isn't empty, consumer is consuming");
-			consume(buffer);
-			notifyAll();
+			System.out.print((x+1) + ": " + this.buffer[x] + ", ");
 		}
 	}
 
 	public boolean isBufferEmpty()
 	{
-		for(int x = 0; x < buffer.length; x++)
+		for(int x = 0; x < this.buffer.length; x++)
 		{
-			if (buffer[x] == 1)
+			if (this.buffer[x] != 0)
 				return false;
 		}
 		//no 1's found, buffer is empty.
@@ -50,9 +63,10 @@ public class Consumer extends Thread
 	{
 		for (int x = 0; x < buffer.length; x++)
 		{
-			if (buffer[x] == 1)
+			if (buffer[x] != 0)
 				buffer[x] = 0;
 		}
+		System.out.print("After consuming, ");
 	}
 
 }

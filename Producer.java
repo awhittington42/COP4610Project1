@@ -1,4 +1,3 @@
-package COP4610;
 
 public class Producer extends Thread
 {
@@ -11,26 +10,31 @@ public class Producer extends Thread
 	@Override
 	public void run()
 	{
-		if (isBufferFull())
+		synchronized (this)
 		{
-			//Buffer is full, producer is waiting.
-			System.out.println("Buffer is full, producer is waiting.");
-			try
+			if (isBufferFull())
 			{
-				wait();
+				//Buffer is full, producer is waiting.
+				printBuffer();
+				System.out.println("Buffer is full, producer is waiting.");
+				try
+				{
+					wait();
+				}
+				catch(InterruptedException e)
+				{
+					System.out.println("Error - Interrupted Exception.");
+					e.printStackTrace();
+				}
 			}
-			catch(InterruptedException e)
+			else
 			{
-				System.out.println("Error - Interrupted Exception.");
-				e.printStackTrace();
+				//buffer isn't full, produce.
+				printBuffer();
+				System.out.println("Buffer isn't full, producer is producing.");
+				produce(this.buffer);
+				notifyAll();
 			}
-		}
-		else
-		{
-			//buffer isn't full, produce.
-			System.out.println("Buffer isn't full, producer is producing.");
-			produce(buffer);
-			notifyAll();
 		}
 	}
 	//removed the "synchronized" keyword from produce method.
@@ -41,13 +45,23 @@ public class Producer extends Thread
 			if(buffer[x] == 0)
 				buffer[x] = x + 1;
 		}
+		System.out.print("After producing, ");
+	}
+
+	synchronized public void printBuffer()
+	{
+		System.out.println("Buffer: ");
+		for (int x = 0; x < this.buffer.length; x++)
+		{
+			System.out.print((x+1) + ": " + this.buffer[x] + ", ");
+		}
 	}
 
 	public boolean isBufferFull()
 	{
-		for(int x = 0; x < buffer.length; x++)
+		for(int x = 0; x < this.buffer.length; x++)
 		{
-			if (buffer[x] == 0)
+			if (this.buffer[x] == 0)
 				return false;
 		}
 		return true;

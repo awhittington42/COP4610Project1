@@ -1,4 +1,3 @@
-package COP4610;
 
 public class Driver
 {
@@ -6,8 +5,9 @@ public class Driver
 	{
 		//start with buffer size of 25
 		int threadArray[] = new int[25];
+		int threadCtr = 0;
 
-		while (true)
+		while (threadCtr < 50) //threadCtr++ != 10)
 		{ 
 			System.out.println("Creating new producer and consumer.");
 			Producer prodThread = new Producer(threadArray);
@@ -17,5 +17,7 @@ public class Driver
 			prodThread.start();
 			conThread.start();
 		}
+
+		System.exit(0);
 	}
 }
